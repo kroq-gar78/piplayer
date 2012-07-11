@@ -198,9 +198,10 @@ public class PiPlayer
         buf1 = new byte[(int)SAMPLE_RATE * SAMPLE_LENGTH / 1000 * bufferSize];
         buf2 = new LinkedList<Byte>();
         
-        // read pi_1mil.txt; pin = pi in ;)
+        
         try
         {
+            // open pi_1mil.txt; pin = pi in ;)
             BufferedReader pin = new BufferedReader( new FileReader("pi_1mil.txt") );
             
             Thread generatorThread = new Thread(new GeneratorThread(pin));
@@ -208,35 +209,6 @@ public class PiPlayer
             
             generatorThread.start();
             playerThread.start();
-            
-            int digitChar;
-            int digitCount = 0;
-            /*while((digitChar = pin.read()) != -1)
-            {
-                if( (char)digitChar == '.' )
-                {
-                    System.out.print('.');
-                    continue;
-                }
-                int digit = Character.getNumericValue((char)digitChar);
-                System.out.print(digit);
-                byte[] newSound = getSound( key[digit], time, 0.2 );
-                for( int i = 0; i < newSound.length; i++ )
-                {
-                    buf2.add((Byte)newSound[i]);
-                }
-                
-                if(digitCount % bufferSize == 0 && digitCount > 0)
-                {
-                    for( int i = 0; i < buf1.length; i++ )
-                    {
-                        buf1[i] = buf2.poll().byteValue();
-                    }
-                    playSound(buf1);
-                }
-                
-                digitCount++;
-            }*/
             
             /*BigInteger pi = new BigInteger(pin.readLine().replace(".",""));
             String piBase12 = pi.toString(12);
