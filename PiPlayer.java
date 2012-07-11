@@ -13,15 +13,18 @@
  */
 
 import java.math.BigInteger;
-import java.io.*;
-import java.util.*;
-import javax.sound.sampled.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
 
 public class PiPlayer
 {
     public static float SAMPLE_RATE = 8000f;
     
-    public static void playSound( double hz, int millis, double vol ) throws LineUnavailableException
+    public static byte[] getSound( double hz, int millis, double vol ) throws LineUnavailableException
     {
         if(hz<=0) throw new IllegalArgumentException("Frequency <= 0 Hz");
         if(millis<=0) throw new IllegalArgumentException("Duration <= 0 msecs");
@@ -42,6 +45,11 @@ public class PiPlayer
             buf[buf.length-1-i] = (byte)(buf[buf.length-1-i] * i / (SAMPLE_RATE/100.0));
         }
         
+        return buf;
+    }
+    
+    public static void playSound( byte[] buf ) throws LineUnavailableException
+    {
         AudioFormat af = new AudioFormat(SAMPLE_RATE,8,1,true,false);
         SourceDataLine sdl = AudioSystem.getSourceDataLine(af);
         sdl.open(af);
@@ -49,6 +57,10 @@ public class PiPlayer
         sdl.write(buf,0,buf.length);
         sdl.drain();
         sdl.close();
+    }
+    public static void playSound( double hz, int millis, double vol ) throws LineUnavailableException
+    {
+        playSound(getSound(hz,millis,vol));
     }
     
     public static double getFrequency(int halfStepsFromConcertA)
@@ -107,7 +119,7 @@ public class PiPlayer
                 }
                 int digit = Character.getNumericValue((char)digitChar);
                 System.out.print(digit);
-                playSound( key[digit] , 350 , 0.2 );
+                playSound( key[digit] , 125 , 0.2 );
                 digitCount++;
             }
             
