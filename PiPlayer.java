@@ -15,7 +15,7 @@
 import java.math.BigInteger;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
@@ -24,21 +24,83 @@ import javax.sound.sampled.SourceDataLine;
 public class PiPlayer
 {
     public static float SAMPLE_RATE = 8000f;
+    public static int SAMPLE_LENGTH = 500; // length of tone in milliseconds
+    public static int BUFFER_SIZE = 10; // how many tones can fit into one buffer
+    
+    public static double[] KEY = new double[10]; // C Major
+    
+    public static boolean EOF = false;
     
     protected static byte[] buf1 = null;
-    protected static ArrayList<Byte> buf2 = null;
+    protected static LinkedList<Byte> buf2 = null;
     
-    private static class SoundGetter implements Runnable
+    private static class GeneratorThread implements Runnable
     {
+        public GeneratorThread(BufferedReader pin)
+        {
+            this.pin = pin;
+        }
+        
         public void run()
         {
             try
             {
-                Thread.sleep(2000);
-                System.out.println(PiPlayer.SAMPLE_RATE);
+                int digitChar = 0;
+                while((digitChar = pin.read()) != -1)
+                {
+                    while(buf2.size()>=(int)SAMPLE_RATE * SAMPLE_LENGTH / 1000 * BUFFER_SIZE*5) Thread.sleep(500);
+                    if( (char)digitChar == '.' )
+                    {
+                        System.out.print('.');
+                        continue;
+                    }
+                    int digit = Character.getNumericValue((char)digitChar);
+                    System.out.print(digit);
+                    byte[] newSound = getSound( KEY[digit], SAMPLE_LENGTH, 0.2 );
+                    for( int i = 0; i < newSound.length; i++ )
+                    {
+                        buf2.add((Byte)newSound[i]);
+                    }
+                }
+                PiPlayer.EOF = true;
             }
-            catch( InterruptedException e ) { e.printStackTrace(); }
+            catch( Exception e ) { e.printStackTrace(); }
         }
+        
+        // pin = pi in ;)
+        private BufferedReader pin;
+    }
+    
+    private static class PlayerThread implements Runnable
+    {
+        public PlayerThread()
+        {
+            digitCount = 0;
+        }
+        
+        public void run()
+        {
+            try
+            {
+                while(!PiPlayer.EOF)
+                {
+                    while(buf2.size()<1000)
+                    {
+                        Thread.sleep(250);
+                    }
+                    for( int i = 0; i < buf1.length; i++ )
+                    {
+                        buf1[i] = buf2.poll().byteValue();
+                    }
+                    playSound(buf1);
+                    digitCount++;
+                }
+            }
+            catch( ArrayIndexOutOfBoundsException e ) {}
+            catch( Exception e ) { e.printStackTrace(); }
+        }
+        
+        private int digitCount;
     }
     
     public static byte[] getSound( double hz, int millis, double vol ) throws LineUnavailableException
@@ -118,25 +180,38 @@ public class PiPlayer
         
         // digit = index
         //double[] key = {cSharp,a,b,cSharp,d,e,fSharp,gSharp,a*2,b*2}; // D Major
-        double[] key = {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
         //double[] key = {e,cSharp,d,e,fSharp,g,a,b,cSharp,d}; // Random Major
+        //KEY = {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
+        KEY[0] = c*2;
+        KEY[1] = a;
+        KEY[2] = b;
+        KEY[3] = c;
+        KEY[4] = d;
+        KEY[5] = e;
+        KEY[6] = f;
+        KEY[7] = g;
+        KEY[8] = a*2;
+        KEY[9] = b*2;
         
         int time = 125;
-        int bufferSize = 3; // how many tones can fit into one buffer
-        buf1 = new byte[(int)SAMPLE_RATE * time / 1000 * bufferSize];
-        buf2 = new ArrayList<Byte>();
+        int bufferSize = 3; 
+        buf1 = new byte[(int)SAMPLE_RATE * SAMPLE_LENGTH / 1000 * bufferSize];
+        buf2 = new LinkedList<Byte>();
         
         // read pi_1mil.txt; pin = pi in ;)
         try
         {
             BufferedReader pin = new BufferedReader( new FileReader("pi_1mil.txt") );
             
-            Thread t = new Thread(new SoundGetter());
-            t.start();
+            Thread generatorThread = new Thread(new GeneratorThread(pin));
+            Thread playerThread = new Thread(new PlayerThread());
+            
+            generatorThread.start();
+            playerThread.start();
             
             int digitChar;
             int digitCount = 0;
-            while((digitChar = pin.read()) != -1)
+            /*while((digitChar = pin.read()) != -1)
             {
                 if( (char)digitChar == '.' )
                 {
@@ -155,14 +230,13 @@ public class PiPlayer
                 {
                     for( int i = 0; i < buf1.length; i++ )
                     {
-                        buf1[i] = buf2.get(i).byteValue();
+                        buf1[i] = buf2.poll().byteValue();
                     }
                     playSound(buf1);
-                    buf2 = new ArrayList<Byte>();
                 }
                 
                 digitCount++;
-            }
+            }*/
             
             /*BigInteger pi = new BigInteger(pin.readLine().replace(".",""));
             String piBase12 = pi.toString(12);
