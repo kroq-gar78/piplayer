@@ -93,7 +93,11 @@ public class PiPlayer
             int digitCount = 0;
             while((digitChar = pin.read()) != -1)
             {
-                if( (char)digitChar == '.' ) continue;
+                if( (char)digitChar == '.' )
+                {
+                    System.out.print('.');
+                    continue;
+                }
                 int digit = Character.getNumericValue((char)digitChar);
                 System.out.print(digit);
                 playSound( key[digit] , 350 , 0.2 );
@@ -103,14 +107,5 @@ public class PiPlayer
         catch(Exception ex) { ex.printStackTrace(); System.exit(1); }
         
         System.out.println();
-        
-        //System.out.println(getFrequency(12));
-        //playSound(440.0,1000,0.8);
-        //playSound(220,1000,0.8);
-        
-        /*for( int i = 0; i < naturals.length; i++ )
-        {
-            playSound(naturals[i],1000,0.5);
-        }*/
     }
 }
