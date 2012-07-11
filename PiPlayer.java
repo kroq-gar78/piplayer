@@ -15,6 +15,7 @@
 import java.math.BigInteger;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
@@ -23,6 +24,22 @@ import javax.sound.sampled.SourceDataLine;
 public class PiPlayer
 {
     public static float SAMPLE_RATE = 8000f;
+    
+    protected static byte[] buf1 = null;
+    protected static ArrayList<Byte> buf2 = null;
+    
+    private static class SoundGetter implements Runnable
+    {
+        public void run()
+        {
+            try
+            {
+                Thread.sleep(2000);
+                System.out.println(PiPlayer.SAMPLE_RATE);
+            }
+            catch( InterruptedException e ) { e.printStackTrace(); }
+        }
+    }
     
     public static byte[] getSound( double hz, int millis, double vol ) throws LineUnavailableException
     {
@@ -55,6 +72,7 @@ public class PiPlayer
         sdl.open(af);
         sdl.start();
         sdl.write(buf,0,buf.length);
+        //System.out.println(buf.length);
         sdl.drain();
         sdl.close();
     }
@@ -68,7 +86,7 @@ public class PiPlayer
         return Math.pow(2,(double)(halfStepsFromConcertA/12))*440;
     }
     
-    public static void main( String[] args ) throws LineUnavailableException
+    public static void main( String[] args ) throws LineUnavailableException, InterruptedException
     {
         // TONS of pitch definitions; all is based on A = 440Hz
         double[] naturals = {440.000,493.883,523.251,587.330,659.255,698.456,783.991};
@@ -103,10 +121,18 @@ public class PiPlayer
         double[] key = {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
         //double[] key = {e,cSharp,d,e,fSharp,g,a,b,cSharp,d}; // Random Major
         
+        int time = 125;
+        int bufferSize = 3; // how many tones can fit into one buffer
+        buf1 = new byte[(int)SAMPLE_RATE * time / 1000 * bufferSize];
+        buf2 = new ArrayList<Byte>();
+        
         // read pi_1mil.txt; pin = pi in ;)
         try
         {
             BufferedReader pin = new BufferedReader( new FileReader("pi_1mil.txt") );
+            
+            Thread t = new Thread(new SoundGetter());
+            t.start();
             
             int digitChar;
             int digitCount = 0;
@@ -119,7 +145,22 @@ public class PiPlayer
                 }
                 int digit = Character.getNumericValue((char)digitChar);
                 System.out.print(digit);
-                playSound( key[digit] , 125 , 0.2 );
+                byte[] newSound = getSound( key[digit], time, 0.2 );
+                for( int i = 0; i < newSound.length; i++ )
+                {
+                    buf2.add((Byte)newSound[i]);
+                }
+                
+                if(digitCount % bufferSize == 0 && digitCount > 0)
+                {
+                    for( int i = 0; i < buf1.length; i++ )
+                    {
+                        buf1[i] = buf2.get(i).byteValue();
+                    }
+                    playSound(buf1);
+                    buf2 = new ArrayList<Byte>();
+                }
+                
                 digitCount++;
             }
             
