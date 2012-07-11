@@ -18,7 +18,7 @@ public class PiPlayer
     
     public static void playSound( double hz, int millis, double vol ) throws LineUnavailableException
     {
-        if(hz<=0) throw new IllegalArgumentException("Frequency <= 0 hz");
+        if(hz<=0) throw new IllegalArgumentException("Frequency <= 0 Hz");
         if(millis<=0) throw new IllegalArgumentException("Duration <= 0 msecs");
         if(vol > 1.0 || vol < 0.0) throw new IllegalArgumentException("Volume not in range 0.0 - 1.0");
         
@@ -53,7 +53,7 @@ public class PiPlayer
     
     public static void main( String[] args ) throws LineUnavailableException
     {
-        // TONS of pitch definitions
+        // TONS of pitch definitions; all is based on A = 440Hz
         double[] naturals = {440.000,493.883,523.251,587.330,659.255,698.456,783.991};
         double a = naturals[0];
         double b = naturals[1];
@@ -105,7 +105,5 @@ public class PiPlayer
             }
         }
         catch(Exception ex) { ex.printStackTrace(); System.exit(1); }
-        
-        System.out.println();
     }
 }
