@@ -1,13 +1,14 @@
 /* PiPlayer.java
  * Created by Aditya Vaidya <kroq.gar78@gmail.com>
  * 
- * Plays the first 1 million digits of Pi based on a certain key (by 
- * default A Major).
+ * Plays the first 1 million digits of Pi based on a certain key (what 
+ * that key is, is yet to be determined :P)
  * 
  * All note frequencies taken from http://en.wikipedia.org/wiki/Piano_key_frequencies
  * 
  */
 
+import java.math.BigInteger;
 import java.io.*;
 import java.util.*;
 import javax.sound.sampled.*;
@@ -82,7 +83,9 @@ public class PiPlayer
         double gFlat = flats[6];
         
         // digit = index
-        double[] key = {a,b,c,cSharp,d,e,f,fSharp,g,gSharp};
+        //double[] key = {cSharp,a,b,cSharp,d,e,fSharp,gSharp,a*2,b*2}; // D Major
+        //double[] key = {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
+        double[] key = {e,cSharp,d,e,fSharp,g,a,b,cSharp,d}; // Random Major
         
         // read pi_1mil.txt; pin = pi in ;)
         try
