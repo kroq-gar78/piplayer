@@ -1,8 +1,12 @@
-/* PiPlayer.java
+/* 
+ * PiPlayer.java
  * Created by Aditya Vaidya <kroq.gar78@gmail.com>
  * 
  * Plays the first 1 million digits of Pi based on a certain key (what 
  * that key is, is yet to be determined :P)
+ * 
+ * Don't worry, it can also play Tau, for those who believe Pi is wrong.
+ * Digits of Tau obtained from http://tauday.com/tau-digits.
  * 
  * All note frequencies taken from http://en.wikipedia.org/wiki/Piano_key_frequencies
  * 
@@ -84,8 +88,8 @@ public class PiPlayer
         
         // digit = index
         //double[] key = {cSharp,a,b,cSharp,d,e,fSharp,gSharp,a*2,b*2}; // D Major
-        //double[] key = {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
-        double[] key = {e,cSharp,d,e,fSharp,g,a,b,cSharp,d}; // Random Major
+        double[] key = {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
+        //double[] key = {e,cSharp,d,e,fSharp,g,a,b,cSharp,d}; // Random Major
         
         // read pi_1mil.txt; pin = pi in ;)
         try
@@ -106,6 +110,10 @@ public class PiPlayer
                 playSound( key[digit] , 350 , 0.2 );
                 digitCount++;
             }
+            
+            /*BigInteger pi = new BigInteger(pin.readLine().replace(".",""));
+            String piBase12 = pi.toString(12);
+            System.out.println(piBase12);*/
         }
         catch(Exception ex) { ex.printStackTrace(); System.exit(1); }
     }
