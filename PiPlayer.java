@@ -24,7 +24,7 @@ import javax.sound.sampled.SourceDataLine;
 public class PiPlayer
 {
     public static float SAMPLE_RATE = 8000f;
-    public static int SAMPLE_LENGTH = 500; // length of tone in milliseconds
+    public static int SAMPLE_LENGTH = 125; // length of tone in milliseconds
     public static int BUFFER_SIZE = 10; // how many tones can fit into one buffer
     
     public static double[] KEY = new double[10]; // C Major
@@ -48,7 +48,10 @@ public class PiPlayer
                 int digitChar = 0;
                 while((digitChar = pin.read()) != -1)
                 {
-                    while(buf2.size()>=(int)SAMPLE_RATE * SAMPLE_LENGTH / 1000 * BUFFER_SIZE*5) Thread.sleep(500);
+                    while(buf2.size()>=getToneArrayLength(SAMPLE_LENGTH)*BUFFER_SIZE*20)
+                    {
+                        Thread.sleep(1000/SAMPLE_LENGTH*4);
+                    }
                     if( (char)digitChar == '.' )
                     {
                         System.out.print('.');
@@ -82,21 +85,21 @@ public class PiPlayer
         {
             try
             {
-                while(!PiPlayer.EOF)
+                while(!PiPlayer.EOF || buf2.size()>getToneArrayLength(SAMPLE_LENGTH))
                 {
-                    while(buf2.size()<1000)
+                    if(buf2.size()<getToneArrayLength(SAMPLE_LENGTH))
                     {
-                        Thread.sleep(250);
+                        Thread.sleep(100);
+                        continue;
                     }
                     for( int i = 0; i < buf1.length; i++ )
                     {
                         buf1[i] = buf2.poll().byteValue();
                     }
                     playSound(buf1);
-                    digitCount++;
+                    //digitCount++;
                 }
             }
-            catch( ArrayIndexOutOfBoundsException e ) {}
             catch( Exception e ) { e.printStackTrace(); }
         }
         
@@ -109,7 +112,7 @@ public class PiPlayer
         if(millis<=0) throw new IllegalArgumentException("Duration <= 0 msecs");
         if(vol > 1.0 || vol < 0.0) throw new IllegalArgumentException("Volume not in range 0.0 - 1.0");
         
-        byte[] buf = new byte[(int)SAMPLE_RATE * millis / 1000];
+        byte[] buf = new byte[getToneArrayLength(millis)];
         
         for( int i = 0; i < buf.length; i++ )
         {
@@ -143,9 +146,14 @@ public class PiPlayer
         playSound(getSound(hz,millis,vol));
     }
     
-    public static double getFrequency(int halfStepsFromConcertA)
+    public static int getToneArrayLength( int millis )
     {
-        return Math.pow(2,(double)(halfStepsFromConcertA/12))*440;
+        return (int)SAMPLE_RATE * millis / 1000;
+    }
+    
+    public static double getFrequency(int halfStepsAboveConcertA)
+    {
+        return Math.pow(2,(double)(halfStepsAboveConcertA/12))*440;
     }
     
     public static void main( String[] args ) throws LineUnavailableException, InterruptedException
@@ -182,7 +190,7 @@ public class PiPlayer
         //double[] key = {cSharp,a,b,cSharp,d,e,fSharp,gSharp,a*2,b*2}; // D Major
         //double[] key = {e,cSharp,d,e,fSharp,g,a,b,cSharp,d}; // Random Major
         //KEY = {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
-        KEY[0] = c*2;
+        /*KEY[0] = c*2;
         KEY[1] = a;
         KEY[2] = b;
         KEY[3] = c;
@@ -191,11 +199,21 @@ public class PiPlayer
         KEY[6] = f;
         KEY[7] = g;
         KEY[8] = a*2;
-        KEY[9] = b*2;
+        KEY[9] = b*2;*/
+        KEY[0] = e*2;
+        KEY[1] = c;
+        KEY[2] = d;
+        KEY[3] = e;
+        KEY[4] = f;
+        KEY[5] = g;
+        KEY[6] = a;
+        KEY[7] = b;
+        KEY[8] = c*2;
+        KEY[9] = d*2;
         
         int time = 125;
         int bufferSize = 3; 
-        buf1 = new byte[(int)SAMPLE_RATE * SAMPLE_LENGTH / 1000 * bufferSize];
+        buf1 = new byte[getToneArrayLength(SAMPLE_LENGTH)*bufferSize];
         buf2 = new LinkedList<Byte>();
         
         
