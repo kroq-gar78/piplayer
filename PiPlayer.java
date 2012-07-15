@@ -23,9 +23,9 @@ import javax.sound.sampled.SourceDataLine;
 
 public class PiPlayer
 {
-    public static float SAMPLE_RATE = 16000f;
+    public static float SAMPLE_RATE = 8000f;
     public static int SAMPLE_LENGTH = 125; // length of tone in milliseconds
-    public static int BUFFER_SIZE = 20; // how many tones can fit into one buffer
+    public static int BUFFER_SIZE = 100; // how many tones can fit into one buffer
     
     public static double[] KEY = new double[10]; // C Major
     
@@ -45,6 +45,7 @@ public class PiPlayer
         
         public void run()
         {
+            int digitCount = 0;
             try
             {
                 int digitChar = 0;
@@ -61,7 +62,8 @@ public class PiPlayer
                     }
                     int digit = Character.getNumericValue((char)digitChar);
                     System.out.print(digit);
-                    buf2.offer(getSquareWave( KEY[digit], SAMPLE_LENGTH, 0.2 ));
+                    buf2.offer((digitCount&1)==0? getSquareWave( KEY[digit], SAMPLE_LENGTH, 0.2 ) : getSineWave( KEY[digit], SAMPLE_LENGTH, 0.2 ));
+                    digitCount++;
                 }
                 PiPlayer.EOF = true;
             }
@@ -97,7 +99,6 @@ public class PiPlayer
                     }
                     SOURCE_DATA_LINE.drain();
                     Thread.sleep(80);
-                    //if(buf2.size()>3) SOURCE_DATA_LINE.write(buf2.poll(),0,SAMPLE_LENGTH);
                     //digitCount++;
                 }
             }
