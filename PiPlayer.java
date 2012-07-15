@@ -25,16 +25,16 @@ public class PiPlayer
 {
     public static float SAMPLE_RATE = 16000f;
     public static int SAMPLE_LENGTH = 250; // length of tone in milliseconds
-    public static int BUFFER_SIZE = 5; // how many tones can fit into one buffer
+    public static int BUFFER_SIZE = 20; // how many tones can fit into one buffer
     
     public static double[] KEY = new double[10]; // C Major
     
     public static boolean EOF = false;
     
-    protected static byte[] buf1 = null;
     protected static LinkedList<byte[]> buf2 = null;
     
     protected static AudioFormat AUDIO_FORMAT;
+    protected static SourceDataLine SOURCE_DATA_LINE;
     
     private static class GeneratorThread implements Runnable
     {
@@ -50,7 +50,7 @@ public class PiPlayer
                 int digitChar = 0;
                 while((digitChar = pin.read()) != -1)
                 {
-                    while(buf2.size()>=BUFFER_SIZE*20)
+                    while(buf2.size()>=BUFFER_SIZE*10)
                     {
                         Thread.sleep(500/SAMPLE_LENGTH*BUFFER_SIZE);
                     }
@@ -83,18 +83,26 @@ public class PiPlayer
         {
             try
             {
-                while(!PiPlayer.EOF || buf2.size()>getToneArrayLength(SAMPLE_LENGTH))
+                while(!PiPlayer.EOF || buf2.size()>1)
                 {
                     if(buf2.size()<1)
                     {
-                        Thread.sleep(100);
+                        Thread.sleep(50);
+                        System.out.println("Too fast!");
                         continue;
                     }
-                    playSound(buf2.poll());
+                    for( int i = 0; i < BUFFER_SIZE && buf2.size() > 1; i++ )
+                    {
+                        SOURCE_DATA_LINE.write(buf2.poll(),0,getToneArrayLength(SAMPLE_LENGTH));
+                    }
+                    SOURCE_DATA_LINE.drain();
+                    Thread.sleep(80);
+                    //if(buf2.size()>3) SOURCE_DATA_LINE.write(buf2.poll(),0,SAMPLE_LENGTH);
                     //digitCount++;
                 }
             }
             catch( Exception e ) { e.printStackTrace(); }
+            SOURCE_DATA_LINE.close();
         }
         
         private int digitCount;
@@ -115,24 +123,20 @@ public class PiPlayer
         }
         
         // shape front and back 10ms of the wave form
-        /*for( int i = 0; i < SAMPLE_RATE/100.0 && i < buf.length / 2; i++ )
+        for( int i = 0; i < SAMPLE_RATE/100.0 && i < buf.length / 2; i++ )
         {
             buf[i] = (byte)(buf[i] * i / (SAMPLE_RATE / 100.0));
             buf[buf.length-1-i] = (byte)(buf[buf.length-1-i] * i / (SAMPLE_RATE/100.0));
-        }*/
+        }
         
         return buf;
     }
     
     public static void playSound( byte[] buf ) throws LineUnavailableException
     {
-        SourceDataLine sdl = AudioSystem.getSourceDataLine(AUDIO_FORMAT);
-        sdl.open(AUDIO_FORMAT,getToneArrayLength(SAMPLE_LENGTH));
-        sdl.start();
-        sdl.write(buf,0,buf.length);
+        
         //System.out.println(buf.length);
-        sdl.drain();
-        sdl.close();
+        SOURCE_DATA_LINE.drain();
     }
     public static void playSound( double hz, int millis, double vol ) throws LineUnavailableException
     {
@@ -204,11 +208,11 @@ public class PiPlayer
         KEY[8] = c*2;
         KEY[9] = d*2;
         
-        int time = 125;
-        int bufferSize = 3; 
-        buf1 = new byte[getToneArrayLength(SAMPLE_LENGTH)*bufferSize];
         buf2 = new LinkedList<byte[]>();
         AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE,8,1,true,true);
+        SOURCE_DATA_LINE = AudioSystem.getSourceDataLine(AUDIO_FORMAT);
+        SOURCE_DATA_LINE.open(AUDIO_FORMAT,getToneArrayLength(SAMPLE_LENGTH));
+        SOURCE_DATA_LINE.start();
         
         try
         {
