@@ -24,8 +24,8 @@ import javax.sound.sampled.SourceDataLine;
 public class PiPlayer
 {
     public static float SAMPLE_RATE = 16000f;
-    public static int SAMPLE_LENGTH = 250; // length of tone in milliseconds
-    public static int BUFFER_SIZE = 20; // how many tones can fit into one buffer
+    public static int SAMPLE_LENGTH = 100; // length of tone in milliseconds
+    public static int BUFFER_SIZE = 1000/100*2; // how many tones can fit into one buffer
     
     public static double[] KEY = new double[10]; // C Major
     
@@ -61,7 +61,7 @@ public class PiPlayer
                     }
                     int digit = Character.getNumericValue((char)digitChar);
                     System.out.print(digit);
-                    buf2.offer(getSound( KEY[digit], SAMPLE_LENGTH, 0.2 ));
+                    buf2.add(getSound( KEY[digit], SAMPLE_LENGTH, 0.2 ));
                 }
                 PiPlayer.EOF = true;
             }
@@ -211,7 +211,7 @@ public class PiPlayer
         buf2 = new LinkedList<byte[]>();
         AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE,8,1,true,true);
         SOURCE_DATA_LINE = AudioSystem.getSourceDataLine(AUDIO_FORMAT);
-        SOURCE_DATA_LINE.open(AUDIO_FORMAT,getToneArrayLength(SAMPLE_LENGTH));
+        SOURCE_DATA_LINE.open(AUDIO_FORMAT,getToneArrayLength(SAMPLE_LENGTH)*BUFFER_SIZE);
         SOURCE_DATA_LINE.start();
         
         try
@@ -222,6 +222,7 @@ public class PiPlayer
             Thread generatorThread = new Thread(new GeneratorThread(pin));
             Thread playerThread = new Thread(new PlayerThread());
             
+            System.out.println(SOURCE_DATA_LINE.getBufferSize());
             generatorThread.start();
             Thread.sleep(250);
             playerThread.start();
