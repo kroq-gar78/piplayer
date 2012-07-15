@@ -61,7 +61,7 @@ public class PiPlayer
                     }
                     int digit = Character.getNumericValue((char)digitChar);
                     System.out.print(digit);
-                    buf2.offer(getSound( KEY[digit], SAMPLE_LENGTH, 0.2 ));
+                    buf2.offer(getSawtoothWave( KEY[digit], SAMPLE_LENGTH, 0.2 ));
                 }
                 PiPlayer.EOF = true;
             }
@@ -108,7 +108,7 @@ public class PiPlayer
         private int digitCount;
     }
     
-    public static byte[] getSound( double hz, int millis, double vol ) throws LineUnavailableException
+    public static byte[] getSineWave( double hz, int millis, double vol ) throws LineUnavailableException
     {
         if(hz<=0) throw new IllegalArgumentException("Frequency <= 0 Hz");
         if(millis<=0) throw new IllegalArgumentException("Duration <= 0 msecs");
@@ -132,16 +132,40 @@ public class PiPlayer
         return buf;
     }
     
+    public static byte[] getSawtoothWave( double hz, int millis, double vol ) throws LineUnavailableException
+    {
+        if(hz<=0) throw new IllegalArgumentException("Frequency <= 0 Hz");
+        if(millis<=0) throw new IllegalArgumentException("Duration <= 0 msecs");
+        if(vol > 1.0 || vol < 0.0) throw new IllegalArgumentException("Volume not in range 0.0 - 1.0");
+        
+        byte[] buf = new byte[getToneArrayLength(millis)];
+        
+        for( int i = 0; i < buf.length; i++ )
+        {
+            //double angle = i / (SAMPLE_RATE/hz) * 2.0 * Math.PI;
+            buf[i] = (byte)((i%(SAMPLE_RATE/hz)) * 127.0 * vol);
+        }
+        
+        // shape front and back 10ms of the wave form
+        /*for( int i = 0; i < SAMPLE_RATE/100.0 && i < buf.length / 2; i++ )
+        {
+            buf[i] = (byte)(buf[i] * i / (SAMPLE_RATE / 100.0));
+            buf[buf.length-1-i] = (byte)(buf[buf.length-1-i] * i / (SAMPLE_RATE/100.0));
+        }*/
+        
+        return buf;
+    }
+    
     public static void playSound( byte[] buf ) throws LineUnavailableException
     {
         
         //System.out.println(buf.length);
         SOURCE_DATA_LINE.drain();
     }
-    public static void playSound( double hz, int millis, double vol ) throws LineUnavailableException
+    /*public static void playSound( double hz, int millis, double vol ) throws LineUnavailableException
     {
         playSound(getSound(hz,millis,vol));
-    }
+    }*/
     
     public static int getToneArrayLength( int millis )
     {
