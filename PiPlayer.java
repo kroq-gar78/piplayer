@@ -25,7 +25,7 @@ public class PiPlayer
 {
     public static float SAMPLE_RATE = 16000f;
     public static int SAMPLE_LENGTH = 100; // length of tone in milliseconds
-    public static int BUFFER_SIZE = 1000/100*2; // how many tones can fit into one buffer
+    public static int BUFFER_SIZE = 1000/SAMPLE_LENGTH*2; // how many tones can fit into one buffer
     
     public static double[] KEY = new double[10]; // C Major
     
@@ -61,7 +61,7 @@ public class PiPlayer
                     }
                     int digit = Character.getNumericValue((char)digitChar);
                     System.out.print(digit);
-                    buf2.add(getSound( KEY[digit], SAMPLE_LENGTH, 0.2 ));
+                    buf2.offer(getSound( KEY[digit], SAMPLE_LENGTH, 0.2 ));
                 }
                 PiPlayer.EOF = true;
             }
@@ -222,7 +222,6 @@ public class PiPlayer
             Thread generatorThread = new Thread(new GeneratorThread(pin));
             Thread playerThread = new Thread(new PlayerThread());
             
-            System.out.println(SOURCE_DATA_LINE.getBufferSize());
             generatorThread.start();
             Thread.sleep(250);
             playerThread.start();
