@@ -108,7 +108,7 @@ public class PiPlayer
         private int digitCount;
     }
     
-    public static byte[] getSineWave( double hz, int millis, double vol ) throws LineUnavailableException
+    public static byte[] getSineWave( double hz, int millis, double vol )
     {
         if(hz<=0) throw new IllegalArgumentException("Frequency <= 0 Hz");
         if(millis<=0) throw new IllegalArgumentException("Duration <= 0 msecs");
@@ -132,7 +132,7 @@ public class PiPlayer
         return buf;
     }
     
-    public static byte[] getSawtoothWave( double hz, int millis, double vol ) throws LineUnavailableException
+    public static byte[] getSawtoothWave( double hz, int millis, double vol )
     {
         if(hz<=0) throw new IllegalArgumentException("Frequency <= 0 Hz");
         if(millis<=0) throw new IllegalArgumentException("Duration <= 0 msecs");
@@ -156,7 +156,7 @@ public class PiPlayer
         return buf;
     }
     
-    public static byte[] getSquareWave( double hz, int millis, double vol ) throws LineUnavailableException
+    public static byte[] getSquareWave( double hz, int millis, double vol )
     {
         if(hz<=0) throw new IllegalArgumentException("Frequency <= 0 Hz");
         if(millis<=0) throw new IllegalArgumentException("Duration <= 0 msecs");
