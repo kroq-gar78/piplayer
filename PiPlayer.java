@@ -24,8 +24,8 @@ import javax.sound.sampled.SourceDataLine;
 public class PiPlayer
 {
     public static float SAMPLE_RATE = 16000f;
-    public static int SAMPLE_LENGTH = 100; // length of tone in milliseconds
-    public static int BUFFER_SIZE = 1000/SAMPLE_LENGTH*2; // how many tones can fit into one buffer
+    public static int SAMPLE_LENGTH = 125; // length of tone in milliseconds
+    public static int BUFFER_SIZE = 20; // how many tones can fit into one buffer
     
     public static double[] KEY = new double[10]; // C Major
     
