@@ -32,7 +32,7 @@ public class PiPlayer
     public static boolean EOF = false;
     
     protected static byte[] buf1 = null;
-    protected static LinkedList<Byte> buf2 = null;
+    protected static LinkedList<byte[]> buf2 = null;
     
     protected static AudioFormat AUDIO_FORMAT;
     
@@ -50,7 +50,7 @@ public class PiPlayer
                 int digitChar = 0;
                 while((digitChar = pin.read()) != -1)
                 {
-                    while(buf2.size()>=getToneArrayLength(SAMPLE_LENGTH)*BUFFER_SIZE*20)
+                    while(buf2.size()>=BUFFER_SIZE*20)
                     {
                         Thread.sleep(500/SAMPLE_LENGTH*BUFFER_SIZE);
                     }
@@ -61,11 +61,7 @@ public class PiPlayer
                     }
                     int digit = Character.getNumericValue((char)digitChar);
                     System.out.print(digit);
-                    byte[] newSound = getSound( KEY[digit], SAMPLE_LENGTH, 0.2 );
-                    for( int i = 0; i < newSound.length; i++ )
-                    {
-                        buf2.offer((Byte)newSound[i]);
-                    }
+                    buf2.offer(getSound( KEY[digit], SAMPLE_LENGTH, 0.2 ));
                 }
                 PiPlayer.EOF = true;
             }
@@ -89,16 +85,12 @@ public class PiPlayer
             {
                 while(!PiPlayer.EOF || buf2.size()>getToneArrayLength(SAMPLE_LENGTH))
                 {
-                    if(buf2.size()<getToneArrayLength(SAMPLE_LENGTH))
+                    if(buf2.size()<1)
                     {
                         Thread.sleep(100);
                         continue;
                     }
-                    for( int i = 0; i < buf1.length; i++ )
-                    {
-                        buf1[i] = buf2.poll().byteValue();
-                    }
-                    playSound(buf1);
+                    playSound(buf2.poll());
                     //digitCount++;
                 }
             }
@@ -215,7 +207,7 @@ public class PiPlayer
         int time = 125;
         int bufferSize = 3; 
         buf1 = new byte[getToneArrayLength(SAMPLE_LENGTH)*bufferSize];
-        buf2 = new LinkedList<Byte>();
+        buf2 = new LinkedList<byte[]>();
         AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE,8,1,true,true);
         
         try
