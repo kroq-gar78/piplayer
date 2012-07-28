@@ -8,7 +8,7 @@
  * Don't worry, it can also play Tau, for those who believe Pi is wrong.
  * Digits of Tau obtained from http://tauday.com/tau-digits.
  * 
- * All note frequencies taken from http://en.wikipedia.org/wiki/Piano_key_frequencies
+ * All note frequencies were taken from http://en.wikipedia.org/wiki/Piano_key_frequencies
  * 
  * 
  * This file is part of PiPlayer.
@@ -24,7 +24,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with PiPlayer.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
 
