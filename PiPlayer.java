@@ -43,7 +43,7 @@ public class PiPlayer
     public static int SAMPLE_LENGTH = 125; // length of tone in milliseconds
     public static int BUFFER_SIZE = 100; // how many tones can fit into one buffer
     
-    public static double[] KEY = new double[10]; // C Major
+    public static double[] KEY = new double[12]; // C Major
     
     public static boolean EOF = false;
     
@@ -71,14 +71,28 @@ public class PiPlayer
                     {
                         Thread.sleep(500/SAMPLE_LENGTH*BUFFER_SIZE);
                     }
+                    int digit = 0;
                     if( (char)digitChar == '.' )
                     {
                         System.out.print('.');
                         continue;
                     }
-                    int digit = Character.getNumericValue((char)digitChar);
-                    System.out.print(digit);
-                    buf2.offer((digitCount&1)==0? getSquareWave( KEY[digit], SAMPLE_LENGTH, 0.2 ) : getSineWave( KEY[digit], SAMPLE_LENGTH, 0.2 ));
+                    if((char)digitChar == 'a')
+                    {
+                        digit = 10;
+                        System.out.print(digit);
+                    }
+                    else if((char)digitChar == 'b')
+                    {
+                        digit = 11;
+                        System.out.print(digit);
+                    }
+                    else
+                    {
+                        digit = Character.getNumericValue((char)digitChar);
+                        System.out.print(digit);
+                    }
+                    buf2.offer((digitCount&1)==0? getSineWave( KEY[digit], SAMPLE_LENGTH, 0.2 ) : getSineWave( KEY[digit], SAMPLE_LENGTH, 0.2 ));
                     digitCount++;
                 }
                 PiPlayer.EOF = true;
@@ -262,7 +276,7 @@ public class PiPlayer
         KEY[7] = g;
         KEY[8] = a*2;
         KEY[9] = b*2;*/
-        KEY[0] = e*2;
+        /*KEY[0] = e*2;
         KEY[1] = c;
         KEY[2] = d;
         KEY[3] = e;
@@ -271,7 +285,19 @@ public class PiPlayer
         KEY[6] = a;
         KEY[7] = b;
         KEY[8] = c*2;
-        KEY[9] = d*2;
+        KEY[9] = d*2;*/
+        KEY[0] = a;
+        KEY[1] = aSharp;
+        KEY[2] = b;
+        KEY[3] = c;
+        KEY[4] = cSharp;
+        KEY[5] = d;
+        KEY[6] = dSharp;
+        KEY[7] = e;
+        KEY[8] = f;
+        KEY[9] = fSharp;
+        KEY[10] = g;
+        KEY[11] = gSharp;
         
         buf2 = new LinkedList<byte[]>();
         AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE,8,1,true,true);
@@ -282,7 +308,7 @@ public class PiPlayer
         try
         {
             // open pi_1mil.txt; pin = pi in ;)
-            BufferedReader pin = new BufferedReader( new FileReader("pi_1mil.txt") );
+            BufferedReader pin = new BufferedReader( new FileReader("pi_10thnd_b12.txt") );
             
             Thread generatorThread = new Thread(new GeneratorThread(pin));
             Thread playerThread = new Thread(new PlayerThread());
