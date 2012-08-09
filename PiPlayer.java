@@ -249,29 +249,12 @@ public class PiPlayer
         double gFlat = flats[6];
         
         // digit = index
-        //double[] key = {cSharp,a,b,cSharp,d,e,fSharp,gSharp,a*2,b*2}; // D Major
-        //double[] key = {e,cSharp,d,e,fSharp,g,a,b,cSharp,d}; // Random Major
-        //KEY = {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
-        /*KEY[0] = c*2;
-        KEY[1] = a;
-        KEY[2] = b;
-        KEY[3] = c;
-        KEY[4] = d;
-        KEY[5] = e;
-        KEY[6] = f;
-        KEY[7] = g;
-        KEY[8] = a*2;
-        KEY[9] = b*2;*/
-        KEY[0] = e*2;
-        KEY[1] = c;
-        KEY[2] = d;
-        KEY[3] = e;
-        KEY[4] = f;
-        KEY[5] = g;
-        KEY[6] = a;
-        KEY[7] = b;
-        KEY[8] = c*2;
-        KEY[9] = d*2;
+        //KEY = new double[] {cSharp,a,b,cSharp,d,e,fSharp,gSharp,a*2,b*2}; // D Major
+        //KEY = new double[] {e,cSharp,d,e,fSharp,g,a,b,cSharp,d}; // Random Major
+        //KEY = new double[] {c*2,a,b,c,d,e,f,g,a*2,b*2}; // C Major
+        //KEY = new double[] {c*2, a, b, c, d, e, f, g, a*2, b*2};
+        
+        KEY = new double[] {e*2, c, d, e, f, g, a, b, c*2, d*2};
         
         buf2 = new LinkedList<byte[]>();
         AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE,8,1,true,true);
