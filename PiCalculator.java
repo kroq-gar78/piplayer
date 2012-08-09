@@ -111,6 +111,7 @@ public class PiCalculator
         
         long stime = System.currentTimeMillis();
         
+        // compute pi in base 10
         atan1_5 = atan(5, digits+5);
         atan1_239 = atan(239, digits+5);
         pi = atan1_5.multiply(FOUR).subtract(atan1_239).multiply(FOUR);
@@ -119,8 +120,7 @@ public class PiCalculator
         
         //System.out.println("Base 10: " + pi);
         
-        // convert pi to base 12
-        
+        // then convert pi to base 12
         String pi12 = "3.";
         System.out.print("3.");
         BigDecimal piFrac = pi.subtract(new BigDecimal("3"));
@@ -150,6 +150,8 @@ public class PiCalculator
             
             //System.out.println(i);
         }
+        
+        //System.out.println("\n" + Double.toString(System.currentTimeMillis()-stime) + " ms execution time");
         
         //System.out.println(pi12);
         
@@ -194,11 +196,7 @@ public class PiCalculator
             numer = numer.divide(invx2, scale, roundingMode);
             int denom = (i<<1)+1;
             term = numer.divide(BigDecimal.valueOf(denom), scale, roundingMode);
-            if((i&1)==1) // if i is odd
-            {
-                result = result.subtract(term);
-            }
-            else result = result.add(term);
+            result = result.subtract(term.multiply(BigDecimal.valueOf(((i&1)==1?-1:1))));
             i++;
         }
         while(term.compareTo(BigDecimal.ZERO) != 0);
