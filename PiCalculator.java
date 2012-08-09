@@ -2,7 +2,7 @@
  * PiCalculator.java
  * Copyright 2012 Aditya Vaidya <kroq.gar78@gmail.com>
  * 
- * Calculates the digits of Pi.
+ * Calculates the digits of Pi and then converts it to base 12 (digits 0 through B).
  * 
  * This program uses the Chudnovsky algorithm (in which I take no claim
  * by implementing it in this program). The formula is taken from here:
@@ -79,9 +79,16 @@ public class PiCalculator
     
     public static void main(String[] args) throws Exception
     {
-        BigDecimal piRecip = new BigDecimal(0);
-        
         int digits = 1000;
+        try
+        {
+            if( args.length > 0 ) digits = Integer.parseInt(args[0]);
+        }
+        catch(NumberFormatException e)
+        {
+            System.err.println("Please input an integer number of base 10 digits, if any.");
+            System.exit(1);
+        }
         
         // use the Chudnovsky Algorithm to calculate the reciprocal of Pi
         /*int maxIter = 3;
