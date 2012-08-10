@@ -49,6 +49,23 @@ public class PiCalculator
         return ans;
     }
     
+    public static class ArctanInvThread extends Thread
+    {
+        public ArctanInvThread(int invx, int scale)
+        {
+            this.invx = invx;
+            this.scale = scale;
+        }
+        
+        public void run()
+        {
+            this.result = atan(invx,scale);
+        }
+        
+        int invx, scale;
+        public BigDecimal result;
+    }
+    
     public static BigDecimal pow(BigDecimal n1, BigDecimal n2) throws Exception
     {
         int n2sign = n2.signum();
@@ -111,9 +128,21 @@ public class PiCalculator
         
         long stime = System.currentTimeMillis();
         
-        // compute pi in base 10
-        atan1_5 = atan(5, digits+5);
-        atan1_239 = atan(239, digits+5);
+        /* Compute pi in base 10
+         * 
+         * Optimize this process by calculating atan(1/5) and atan(1/239)
+         * in separate threads
+         */
+        ArctanInvThread atan1_5_thread = new ArctanInvThread(5, digits+5);
+        ArctanInvThread atan1_239_thread = new ArctanInvThread(239, digits+5);
+        atan1_5_thread.start();
+        atan1_239_thread.start();
+        atan1_5_thread.join();
+        atan1_239_thread.join();
+        atan1_5 = atan1_5_thread.result;
+        atan1_239 = atan1_239_thread.result;
+        /*atan1_5 = atan(5, digits+5);
+        atan1_239 = atan(239, digits+5);*/
         pi = atan1_5.multiply(FOUR).subtract(atan1_239).multiply(FOUR);
         pi.setScale(digits, BigDecimal.ROUND_HALF_UP);
         //long etime = System.currentTimeMillis();
@@ -121,6 +150,16 @@ public class PiCalculator
         //System.out.println("Base 10: " + pi);
         
         // then convert pi to base 12
+        
+        /* NOTE: This could be optimized by multithreading. Two (or more)
+         * threads could be run at the same time, with one thread being
+         * ahead of the other(s). If the ahead threads can divide without
+         * the value (the base 12 digit) being over B, then force all threads
+         * to skip to the point where the ahead thread is. If it can't
+         * divide evenly, tell it to wait for the thread immediately behind
+         * it to get to where it is possible to get that digit.
+         */
+        
         String pi12 = "3.";
         System.out.print("3.");
         BigDecimal piFrac = pi.subtract(new BigDecimal("3"));
@@ -151,7 +190,7 @@ public class PiCalculator
             //System.out.println(i);
         }
         
-        //System.out.println("\n" + Double.toString(System.currentTimeMillis()-stime) + " ms execution time");
+        System.out.println("\n" + Double.toString(System.currentTimeMillis()-stime) + " ms execution time");
         
         //System.out.println(pi12);
         
