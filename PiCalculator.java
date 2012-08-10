@@ -235,7 +235,7 @@ public class PiCalculator
             numer = numer.divide(invx2, scale, roundingMode);
             int denom = (i<<1)+1;
             term = numer.divide(BigDecimal.valueOf(denom), scale, roundingMode);
-            result = result.subtract(term.multiply(BigDecimal.valueOf(((i&1)==1?-1:1))));
+            result = result.add(term.multiply(BigDecimal.valueOf(((i&1)==1?-1:1))));
             i++;
         }
         while(term.compareTo(BigDecimal.ZERO) != 0);
